@@ -27,10 +27,31 @@
 ;; -------------------------
 ;; Page components
 
-(def data (map #(assoc % :total (+ (:gold %) (:silver %) (:bronze %))) [{:country "USAA"
-                    :gold 5
-                    :silver 4
-                    :bronze 5}]))
+(def data (map #(assoc % :total (+ (:gold %) (:silver %) (:bronze %)))
+               [{:country "USA"
+                 :gold 5
+                 :silver 4
+                 :bronze 5},
+                {:country "RUS"
+                 :gold 6
+                 :silver 5
+                 :bronze 4}]))
+
+(def app-state (reagent/atom {:sort-val :total :ascending true}))
+
+;; From reagent-cookbook example:
+(defn update-sort-value [new-val]
+  (if (= new-val (:sort-val @app-state))
+    (swap! app-state update-in [:ascending] not)
+    (swap! app-state assoc :ascending false))
+  (swap! app-state assoc :sort-val new-val))
+
+;; From reagent-cookbook example:
+(defn sorted-contents []
+  (let [sorted-contents (sort-by (:sort-val @app-state) data)]
+    (if (:ascending @app-state)
+      sorted-contents
+      (rseq sorted-contents))))
 
 (defn home-page []
   (fn []
@@ -40,10 +61,10 @@
       [:thead
        [:tr
         [:th ""]
-        [:th "Gold"]
-        [:th "Silver"]
-        [:th "Bronze"]
-        [:th "Total"]]]
+        [:th {:on-click #(update-sort-value :gold)} "Gold"]
+        [:th {:on-click #(update-sort-value :silver)} "Silver"]
+        [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
+        [:th {:on-click #(update-sort-value :total)} "Total" ]]]
       [:tbody
        (map #(identity [:tr
                         [:td (:country %)]
@@ -51,7 +72,7 @@
                         [:td (:silver %)]
                         [:td (:bronze %)]
                         [:td (:total %)]
-                        ]) data)
+                        ]) (sorted-contents))
        ]]
      ;; [:ul
      ;;  [:li [:a {:href (path-for :items)} "Items of tally-cljs"]]
