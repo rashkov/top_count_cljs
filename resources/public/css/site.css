@@ -1,34 +1,39 @@
-.body-container {
-  font-family: 'Helvetica Neue', Verdana, Helvetica, Arial, sans-serif;
-  max-width: 600px;
-  margin: 0 auto;
-  padding-top: 72px;
-  -webkit-font-smoothing: antialiased;
-  font-size: 1.125em;
-  color: #333;
-  line-height: 1.5em;
+.app {
+    font-family: "Arial";
+    color: gray;
+    padding: 20px;
+}
+.medals-table {
+    text-align: center;
+}
+.medals-table tbody tr:first-child {
+    border-top: 2px solid #999797;
+}
+.medals-table tr {
+    border-bottom: 1px solid #D3D3D3;
 }
 
-h1, h2, h3 {
-  color: #000;
-}
-h1 {
-  font-size: 2.5em
+.medals-table tr th{
+    cursor: pointer;
+    user-select: none;
 }
 
-h2 {
-  font-size: 2em
+.medals-table tr th,
+.medals-table tr td
+{
+    padding: 7px;
+}
+.medals-table tbody {
+    border-top: 1px solid gray;
 }
 
-h3 {
-  font-size: 1.5em
+.medals-table .flag-column{
+    text-align: left;
+    padding-right: 60px;
 }
-
-a {
-  text-decoration: none;
-  color: #09f;
+.medals-table .flag-column span{
+    padding-right: 12px;
 }
-
-a:hover {
-  text-decoration: underline;
+.medals-table .country-code{
+    font-weight: bold;
 }

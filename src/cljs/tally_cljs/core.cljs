@@ -47,9 +47,9 @@
   (let [err (:network-error @app-state)]
     (if err
       [:div (.-message err)]
-      [:span.main
-       [:h1 "Medals"]
-       [:table
+      [:span.app
+       [:div "Medals"]
+       [:table.medals-table
         [:thead
          [:tr
           [:th ""]
