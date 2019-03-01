@@ -27,17 +27,7 @@
 ;; -------------------------
 ;; Page components
 
-(def data (map #(assoc % :total (+ (:gold %) (:silver %) (:bronze %)))
-               [{:country "USA"
-                 :gold 5
-                 :silver 4
-                 :bronze 5},
-                {:country "RUS"
-                 :gold 6
-                 :silver 5
-                 :bronze 4}]))
-
-(def app-state (reagent/atom {:sort-val :total :ascending true}))
+(def app-state (reagent/atom {:sort-val :total :ascending true :medals-data [] :network-error nil}))
 
 ;; From reagent-cookbook example:
 (defn update-sort-value [new-val]
@@ -48,38 +38,53 @@
 
 ;; From reagent-cookbook example:
 (defn sorted-contents []
-  (let [sorted-contents (sort-by (:sort-val @app-state) data)]
+  (let [sorted-contents (sort-by (:sort-val @app-state) (js->clj (:medals-data @app-state) :keywordize-keys true))]
     (if (:ascending @app-state)
       sorted-contents
       (rseq sorted-contents))))
 
 (defn home []
-  [:span.main
-   [:h1 "Medals"]
-   [:table
-    [:thead
-     [:tr
-      [:th ""]
-      [:th {:on-click #(update-sort-value :gold)} "Gold"]
-      [:th {:on-click #(update-sort-value :silver)} "Silver"]
-      [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
-      [:th {:on-click #(update-sort-value :total)} "Total" ]]]
-    [:tbody
-     (map #(identity [:tr
-                      [:td (:country %)]
-                      [:td (:gold %)]
-                      [:td (:silver %)]
-                      [:td (:bronze %)]
-                      [:td (:total %)]
-                      ]) (sorted-contents))
-     ]]
-   ;; [:ul
-   ;;  [:li [:a {:href (path-for :items)} "Items of tally-cljs"]]
-   ;;  [:li [:a {:href "/borken/link"} "Borken link"]]]
-   ])
+  (let [err (:network-error @app-state)]
+    (if err
+      [:div (.-message err)]
+      [:span.main
+       [:h1 "Medals"]
+       [:table
+        [:thead
+         [:tr
+          [:th ""]
+          [:th {:on-click #(update-sort-value :gold)} "Gold"]
+          [:th {:on-click #(update-sort-value :silver)} "Silver"]
+          [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
+          [:th {:on-click #(update-sort-value :total)} "Total" ]]]
+        [:tbody
+         (map #(identity ^{:key (:code %)}[:tr
+                          [:td (:code %)]
+                          [:td (:gold %)]
+                          [:td (:silver %)]
+                          [:td (:bronze %)]
+                          [:td (:total %)]
+                          ]) (sorted-contents))
+         ]]
+       ])))
 
 (defn home-did-mount []
-  (.then (js/fetch "https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json") #(js/console.log %)) )
+  (->
+   (js/fetch "https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json")
+   (.then (fn [response]
+            (if (.-ok response)
+              (.json response)
+              (throw (js/Error. (str "Failed to fetch medals data: " (.-status response) " " (.-statusText response)))))))
+   (.then (fn [data]
+            (.map data #(do
+                          (set! (.-total %) (+ (.-gold %) (.-silver %) (.-bronze %)))
+                           %))
+            (swap! app-state assoc :medals-data data)
+            ))
+   (.catch (fn [error]
+             (swap! app-state assoc :network-error error)
+             ))
+   ))
 
 (defn home-component []
   (reagent/create-class {:reagent-render home
