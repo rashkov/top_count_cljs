@@ -56,17 +56,14 @@
           [:th {:on-click #(update-sort-value :gold)} "Gold"]
           [:th {:on-click #(update-sort-value :silver)} "Silver"]
           [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
-          [:th {:on-click #(update-sort-value :total)} "Total" ]]]
+          [:th {:on-click #(update-sort-value :total)} "Total"]]]
         [:tbody
-         (map #(identity ^{:key (:code %)}[:tr
-                          [:td (:code %)]
-                          [:td (:gold %)]
-                          [:td (:silver %)]
-                          [:td (:bronze %)]
-                          [:td (:total %)]
-                          ]) (sorted-contents))
-         ]]
-       ])))
+         (map #(identity ^{:key (:code %)} [:tr
+                                            [:td (:code %)]
+                                            [:td (:gold %)]
+                                            [:td (:silver %)]
+                                            [:td (:bronze %)]
+                                            [:td (:total %)]]) (sorted-contents))]]])))
 
 (defn home-did-mount []
   (->
@@ -78,13 +75,10 @@
    (.then (fn [data]
             (.map data #(do
                           (set! (.-total %) (+ (.-gold %) (.-silver %) (.-bronze %)))
-                           %))
-            (swap! app-state assoc :medals-data data)
-            ))
+                          %))
+            (swap! app-state assoc :medals-data data)))
    (.catch (fn [error]
-             (swap! app-state assoc :network-error error)
-             ))
-   ))
+             (swap! app-state assoc :network-error error)))))
 
 (defn home-component []
   (reagent/create-class {:reagent-render home
@@ -162,8 +156,7 @@
         (reagent/after-render clerk/after-render!)
         (session/put! :route {:current-page (page-for current-page)
                               :route-params route-params})
-        (clerk/navigate-page! path)
-        ))
+        (clerk/navigate-page! path)))
     :path-exists?
     (fn [path]
       (boolean (reitit/match-by-path router path)))})
