@@ -52,34 +52,40 @@
     (if (:ascending @app-state)
       sorted-contents
       (rseq sorted-contents))))
+(defn home []
+  [:span.main
+   [:h1 "Medals"]
+   [:table
+    [:thead
+     [:tr
+      [:th ""]
+      [:th {:on-click #(update-sort-value :gold)} "Gold"]
+      [:th {:on-click #(update-sort-value :silver)} "Silver"]
+      [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
+      [:th {:on-click #(update-sort-value :total)} "Total" ]]]
+    [:tbody
+     (map #(identity [:tr
+                      [:td (:country %)]
+                      [:td (:gold %)]
+                      [:td (:silver %)]
+                      [:td (:bronze %)]
+                      [:td (:total %)]
+                      ]) (sorted-contents))
+     ]]
+   ;; [:ul
+   ;;  [:li [:a {:href (path-for :items)} "Items of tally-cljs"]]
+   ;;  [:li [:a {:href "/borken/link"} "Borken link"]]]
+   ])
 
+(defn home-did-mount []
+  (js/console.log "home did mount"))
+
+(defn home-component []
+  (reagent/create-class {:reagent-render home
+                         :component-did-mount home-did-mount}))
 (defn home-page []
   (fn []
-    [:span.main
-     [:h1 "Medals"]
-     [:table
-      [:thead
-       [:tr
-        [:th ""]
-        [:th {:on-click #(update-sort-value :gold)} "Gold"]
-        [:th {:on-click #(update-sort-value :silver)} "Silver"]
-        [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
-        [:th {:on-click #(update-sort-value :total)} "Total" ]]]
-      [:tbody
-       (map #(identity [:tr
-                        [:td (:country %)]
-                        [:td (:gold %)]
-                        [:td (:silver %)]
-                        [:td (:bronze %)]
-                        [:td (:total %)]
-                        ]) (sorted-contents))
-       ]]
-     ;; [:ul
-     ;;  [:li [:a {:href (path-for :items)} "Items of tally-cljs"]]
-     ;;  [:li [:a {:href "/borken/link"} "Borken link"]]]
-     ]))
-
-
+    (home-component)))
 
 ;; (defn items-page []
 ;;   (fn []
