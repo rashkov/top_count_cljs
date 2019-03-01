@@ -52,6 +52,7 @@
     (if (:ascending @app-state)
       sorted-contents
       (rseq sorted-contents))))
+
 (defn home []
   [:span.main
    [:h1 "Medals"]
@@ -78,7 +79,7 @@
    ])
 
 (defn home-did-mount []
-  (js/console.log "home did mount"))
+  (.then (js/fetch "https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json") #(js/console.log %)) )
 
 (defn home-component []
   (reagent/create-class {:reagent-render home
