@@ -106,7 +106,7 @@
   (let [err (:network-error @app-state)]
     (if err
       [:div (.-message err)]
-      [:span.app
+      [:div.app
        [:div.title "MEDAL COUNT"]
        [:table.medals-table
         [:thead
