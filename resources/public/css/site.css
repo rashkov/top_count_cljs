@@ -3,6 +3,9 @@
     color: gray;
     padding: 20px;
 }
+.title {
+  font-size: 18px;
+}
 .medals-table {
     text-align: center;
 }
@@ -36,4 +39,26 @@
 }
 .medals-table .country-code{
     font-weight: bold;
+}
+
+.medals-table .row-num {
+  display: inline-block;
+  width: 30px;
+  text-align: right;
+}
+
+.flag {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.total-td {
+  font-weight: 600;
+  color: "#565656";
+}
+
+.total-th {
+  color: #565656;
+  font-weight: normal;
+  font-size: 12px;
 }

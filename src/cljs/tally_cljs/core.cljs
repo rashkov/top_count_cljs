@@ -55,12 +55,41 @@
       sorted-contents
       (rseq sorted-contents))))
 
+(defn get-flag [country-code]
+  (let [FLAG_ORDER ["AUT"
+                    "BLR"
+                    "CAN"
+                    "CHN"
+                    "FRA"
+                    "GER"
+                    "ITA"
+                    "NED"
+                    "NOR"
+                    "RUS"
+                    "SUI"
+                    "SWE"
+                    "USA"]
+        FLAG_URL "https://s3-us-west-2.amazonaws.com/reuters.medals-widget/flags.png"
+        FLAG_WIDTH 28
+        FLAG_HEIGHT 17
+        flag-index (.indexOf FLAG_ORDER country-code)
+        url-style (str "url("
+                       FLAG_URL
+                       ") 0px -"
+                       (* flag-index FLAG_HEIGHT)
+                       "px")
+        flag-style {:width FLAG_WIDTH
+                    :height FLAG_HEIGHT
+                    :background url-style}]
+
+    [:div {:style flag-style}]))
+
 (defn home []
   (let [err (:network-error @app-state)]
     (if err
       [:div (.-message err)]
       [:span.app
-       [:div "Medals"]
+       [:div.title "MEDAL COUNT"]
        [:table.medals-table
         [:thead
          [:tr
@@ -68,14 +97,19 @@
           [:th {:on-click #(update-sort-value :gold)} "Gold"]
           [:th {:on-click #(update-sort-value :silver)} "Silver"]
           [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
-          [:th {:on-click #(update-sort-value :total)} "Total"]]]
+          [:th.total-th {:on-click #(update-sort-value :total)} "TOTAL"]]]
         [:tbody
-         (map #(identity ^{:key (:code %)} [:tr
-                                            [:td (:code %)]
-                                            [:td (:gold %)]
-                                            [:td (:silver %)]
-                                            [:td (:bronze %)]
-                                            [:td (:total %)]]) (sorted-contents))]]])))
+         (map-indexed #(identity
+                        ^{:key (:code %2)}
+                        [:tr
+                         [:td.flag-column
+                          [:span.row-num (+ 1 %1)]
+                          [:span.flag (get-flag (:code %2))]
+                          [:span.country-code (:code %2)]]
+                         [:td (:gold %2)]
+                         [:td (:silver %2)]
+                         [:td (:bronze %2)]
+                         [:td.total-td (:total %2)]]) (sorted-contents))]]])))
 
 (defn home-did-mount []
   (->
