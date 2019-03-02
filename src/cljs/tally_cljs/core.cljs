@@ -84,6 +84,12 @@
 
     [:div {:style flag-style}]))
 
+(defn get-medal-header [medal]
+  (case medal
+    :gold [:div.medal-header.gold]
+    :silver [:div.medal-header.silver]
+    :bronze [:div.medal-header.bronze]))
+
 (defn home []
   (let [err (:network-error @app-state)]
     (if err
@@ -94,9 +100,9 @@
         [:thead
          [:tr
           [:th ""]
-          [:th {:on-click #(update-sort-value :gold)} "Gold"]
-          [:th {:on-click #(update-sort-value :silver)} "Silver"]
-          [:th {:on-click #(update-sort-value :bronze)} "Bronze"]
+          [:th {:on-click #(update-sort-value :gold)} (get-medal-header :gold)]
+          [:th {:on-click #(update-sort-value :silver)} (get-medal-header :silver)]
+          [:th {:on-click #(update-sort-value :bronze)} (get-medal-header :bronze)]
           [:th.total-th {:on-click #(update-sort-value :total)} "TOTAL"]]]
         [:tbody
          (map-indexed #(identity
