@@ -27,9 +27,10 @@
 ;; -------------------------
 ;; Page components
 
-(def app-state (reagent/atom {:sort-val :total :ascending true :medals-data [] :network-error nil}))
-
+(def app-state (reagent/atom {:sort-val :total :ascending false :medals-data [] :network-error nil}))
 (defn medals-data [] (:medals-data @app-state))
+(defn sort-val [] (:sort-val @app-state))
+(defn ascending [] (:ascending @app-state))
 
 (defn weighted-sort-by-column [get-column, data]
   "Sorts by a particular column (gold, silver, bronze, or total).
@@ -53,7 +54,7 @@
   (let [sorted-contents (weighted-sort-by-column (:sort-val @app-state) (medals-data))]
     (if (:ascending @app-state)
       sorted-contents
-      (rseq sorted-contents))))
+      (rseq (vec sorted-contents)))))
 
 (defn get-flag [country-code]
   (let [FLAG_ORDER ["AUT"
@@ -90,6 +91,17 @@
     :silver [:div.medal-header.silver]
     :bronze [:div.medal-header.bronze]))
 
+(defn sort-class [medal]
+  (let [sort-val (sort-val)
+        ascending (ascending)
+        sorting (= medal sort-val)
+        sort-class (if (and sorting ascending)
+                     :ascending
+                     (if (and sorting (not ascending))
+                       :descending))]
+    sort-class
+))
+
 (defn home []
   (let [err (:network-error @app-state)]
     (if err
@@ -100,10 +112,18 @@
         [:thead
          [:tr
           [:th ""]
-          [:th {:on-click #(update-sort-value :gold)} (get-medal-header :gold)]
-          [:th {:on-click #(update-sort-value :silver)} (get-medal-header :silver)]
-          [:th {:on-click #(update-sort-value :bronze)} (get-medal-header :bronze)]
-          [:th.total-th {:on-click #(update-sort-value :total)} "TOTAL"]]]
+          [:th {:on-click #(update-sort-value :gold)
+                :class (sort-class :gold)}
+           (get-medal-header :gold)]
+          [:th {:on-click #(update-sort-value :silver)
+                :class (sort-class :silver)}
+           (get-medal-header :silver)]
+          [:th {:on-click #(update-sort-value :bronze)
+                :class (sort-class :bronze)}
+           (get-medal-header :bronze)]
+          [:th.total-th {:on-click #(update-sort-value :total)
+                         :class (sort-class :total)}
+           "TOTAL"]]]
         [:tbody
          (map-indexed #(identity
                         ^{:key (:code %2)}

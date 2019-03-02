@@ -81,3 +81,11 @@
 .bronze {
   background-color: #824a02;
 }
+
+.ascending {
+  border-bottom: 2px solid #999797;
+}
+
+.descending {
+  border-top: 2px solid #999797;
+}
