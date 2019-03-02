@@ -1,6 +1,6 @@
-# tally-cljs
+# top-count-cljs
 
-This is the tally-cljs project.
+This is the top-count-cljs project.
 
 ## Development mode
 
