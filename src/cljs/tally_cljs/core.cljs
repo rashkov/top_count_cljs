@@ -29,6 +29,18 @@
 
 (def app-state (reagent/atom {:sort-val :total :ascending true :medals-data [] :network-error nil}))
 
+(defn medals-data [] (:medals-data @app-state))
+
+(defn weighted-sort-by-column [get-column, data]
+  "Sorts by a particular column (gold, silver, bronze, or total).
+   Breaks ties by doing a secondary sort on gold, then silver."
+  (sort-by (fn [item]
+             (+
+              (get-column item)
+              (/ (:gold item) 10)
+              (/ (:silver item) 100)))
+           data))
+
 ;; From reagent-cookbook example:
 (defn update-sort-value [new-val]
   (if (= new-val (:sort-val @app-state))
@@ -38,7 +50,7 @@
 
 ;; From reagent-cookbook example:
 (defn sorted-contents []
-  (let [sorted-contents (sort-by (:sort-val @app-state) (js->clj (:medals-data @app-state) :keywordize-keys true))]
+  (let [sorted-contents (weighted-sort-by-column (:sort-val @app-state) (medals-data))]
     (if (:ascending @app-state)
       sorted-contents
       (rseq sorted-contents))))
@@ -76,7 +88,7 @@
             (.map data #(do
                           (set! (.-total %) (+ (.-gold %) (.-silver %) (.-bronze %)))
                           %))
-            (swap! app-state assoc :medals-data data)))
+            (swap! app-state assoc :medals-data (js->clj data :keywordize-keys true))))
    (.catch (fn [error]
              (swap! app-state assoc :network-error error)))))
 
@@ -125,6 +137,7 @@
 
 ;; -------------------------
 ;; Page mounting component
+
 
 (defn current-page []
   (fn []
