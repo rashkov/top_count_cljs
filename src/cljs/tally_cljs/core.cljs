@@ -22,10 +22,14 @@
 ;; -------------------------
 ;; Page components
 
-(def app-state (reagent/atom {:sort-val :total :ascending false :medals-data [] :network-error nil}))
-(defn medals-data [] (:medals-data @app-state))
-(defn sort-val [] (:sort-val @app-state))
-(defn ascending [] (:ascending @app-state))
+(def app-state (reagent/atom {:sort-val :total
+                              :ascending false
+                              :medals-data []
+                              :network-error nil}))
+(def medals-data-cursor (reagent/cursor app-state [:medals-data]))
+(def sort-val-cursor (reagent/cursor app-state [:sort-val]))
+(def ascending-cursor (reagent/cursor app-state [:ascending]))
+(def network-error-cursor (reagent/cursor app-state [:network-error]))
 
 (defn weighted-sort-by-column [get-column, data]
   "Sorts by a particular column (gold, silver, bronze, or total).
@@ -39,15 +43,15 @@
 
 ;; From reagent-cookbook example:
 (defn update-sort-value [new-val]
-  (if (= new-val (:sort-val @app-state))
-    (swap! app-state update-in [:ascending] not)
-    (swap! app-state assoc :ascending false))
-  (swap! app-state assoc :sort-val new-val))
+  (if (= new-val @sort-val-cursor)
+    (swap! ascending-cursor not)
+    (reset! ascending-cursor false))
+  (reset! sort-val-cursor new-val))
 
 ;; From reagent-cookbook example:
 (defn sorted-contents []
-  (let [sorted-contents (weighted-sort-by-column (:sort-val @app-state) (medals-data))]
-    (if (:ascending @app-state)
+  (let [sorted-contents (weighted-sort-by-column @sort-val-cursor @medals-data-cursor)]
+    (if @ascending-cursor
       sorted-contents
       (rseq (vec sorted-contents)))))
 
@@ -70,9 +74,9 @@
     :bronze [:div.medal-header.bronze]))
 
 (defn sort-class [medal]
-  (let [sort-val (sort-val)
-        ascending (ascending)
-        sorting (= medal sort-val)
+  (let [sort-val @sort-val-cursor
+        ascending @ascending-cursor
+        sorting (= medal @sort-val-cursor)
         sort-class (if (and sorting ascending)
                      :ascending
                      (if (and sorting (not ascending))
@@ -81,7 +85,7 @@
 ))
 
 (defn home []
-  (let [err (:network-error @app-state)]
+  (let [err @network-error-cursor]
     (if err
       [:div (.-message err)]
       [:div.app
@@ -126,9 +130,9 @@
             (.map data #(do
                           (set! (.-total %) (+ (.-gold %) (.-silver %) (.-bronze %)))
                           %))
-            (swap! app-state assoc :medals-data (js->clj data :keywordize-keys true))))
+            (reset! medals-data-cursor (js->clj data :keywordize-keys true))))
    (.catch (fn [error]
-             (swap! app-state assoc :network-error error)))))
+             (reset! network-error-cursor error)))))
 
 (defn home-component []
   (reagent/create-class {:reagent-render home
